@@ -3,7 +3,18 @@ var metdata = null;
 var army_details_library = {};
 
 var labels = {
-	nfb: {skills: [], equips: []}
+	hidden: { // These hide the trooper until they are revealed and deployed
+		equips: [24], // HoloMask
+		skills: [29, 35, 238, 249, 33], // Camouflage, Combat Jump, Hidden Deployment, Impersonation, Parachutist
+	}
+	nfb: { // These cannot be used at the same time
+		equips: [183, 24, 104], // Albedo, Holomask, Holoprojector
+		hacks: ["Cybermask", "White Noise"],
+		skills: [249, 28], // Impersonation, Mimetism
+	},
+	private: { // The existance of these are hidden
+		skills: [26, 207, 119], // Chain of Command, Counterintelligence, Lieutenant
+	},
 };
 
 $.getJSON('https://api.corvusbelli.com/army/infinity/en/metadata', function(e) {
@@ -22,18 +33,6 @@ $.getJSON('https://api.corvusbelli.com/army/infinity/en/metadata', function(e) {
 	
 	console.log(metadata);
 	
-	// Locate NFB skills
-	if (metadata.skills[249].name == "Impersonation") labels.nfb.skills.push(249);
-	else alert("Could not locate Impersonation skill");
-	if (metadata.skills[28].name == "Mimetism") labels.nfb.skills.push(28);
-	else alert("Could not locate Mimetism skill");
-	// Locate NFB equips
-	if (metadata.equips[183].name == "Albedo") labels.nfb.equips.push(183);
-	else alert("Could not locate Albedo equip");
-	if (metadata.equips[24].name == "Holomask") labels.nfb.equips.push(24);
-	else alert("Could not locate Holomask equip");
-	if (metadata.equips[104].name == "Holoprojector") labels.nfb.equips.push(104);
-	else alert("Could not locate Holoprojector equip");
 });
 
 
