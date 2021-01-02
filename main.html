@@ -1,0 +1,38 @@
+<html>
+
+<div id="main-body">
+</div>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="common.js"></script>
+
+<script>
+	
+	var test_code = "gZQPcmFtYWgtdGFza2ZvcmNlCSBSYW1haCBONIEsAgEIAYEvAQYAAoEvAQUAA4EvAQkABINRAQEABYEtAQgABoEtAQ4AB4EtAQQACIEuAQEAAgUBgTEBBgACgTEBAwADgTEBBQAEhSIBBQAFMgEBAA==";
+	//test_code = "gM0Md2hpdGUtYmFubmVyASCBLAEBAgCF1wEBAACF1wEBAA==";
+	//test_code = "gMkHeXUtamluZwEggSwBAQEAfAEBAA==";
+	
+	
+	fetch_list_details (test_code, function (army, list, details) {
+		console.log({army:army, list:list, details:details});
+		var ret = "";
+		for (var i in details)
+		{
+			ret += "<h2>Group "+(parseInt(i)+1)+"</h2>";
+			
+			for (var j in details[i])
+			{
+				var curr = details[i][j];
+				
+				ret += "<h3>"+curr.name+"</h3>";
+			}
+			
+			$("#main-body").html(ret);
+		}
+	});
+	
+</script>
+
+
+</html>
