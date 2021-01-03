@@ -345,5 +345,18 @@ function resolve_trooper_details (army, trooper)
 			}
 			return ret;
 		},
+		
+		has_hidden_ability: function()
+		{
+			for (var i in this.abilities)
+			{
+				var a = this.abilities[i];
+				if (a.type == "SKILL" && labels.hidden.skills.includes(a.id))
+					return true;
+				if (a.type == "EQUIPMENT" && labels.hidden.equips.includes(a.id))
+					return true;
+			}
+			return false;
+		},
 	};
 }

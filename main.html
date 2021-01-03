@@ -28,6 +28,12 @@
 				
 				ret += "<h3>"+curr.name+"</h3>";
 				
+				if (curr.has_hidden_ability())
+				{
+					ret += "hidden";
+					continue;
+				}
+				
 				ret += "<b>Attributes:</b>";
 				ret += " MOV " + (curr.attributes.move[0]*4/10) + "-" + (curr.attributes.move[1]*4/10);
 				ret += " CC " + curr.attributes.cc;
