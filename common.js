@@ -1,12 +1,15 @@
 
-var metdata = null;
+var metadata = null;
+var metadata_ammunitions = null;
+var metadata_equips = null;
+var metadata_skills = null;
 var army_details_library = {};
 
 var labels = {
 	hidden: { // These hide the trooper until they are revealed and deployed
 		equips: [24], // HoloMask
 		skills: [29, 35, 238, 249, 33], // Camouflage, Combat Jump, Hidden Deployment, Impersonation, Parachutist
-	}
+	},
 	nfb: { // These cannot be used at the same time
 		equips: [183, 24, 104], // Albedo, Holomask, Holoprojector
 		hacks: ["Cybermask", "White Noise"],
@@ -20,19 +23,16 @@ var labels = {
 $.getJSON('https://api.corvusbelli.com/army/infinity/en/metadata', function(e) {
 	console.log(e);
 	
-	metadata = {
-		ammunitions: {},
-		equips: {},
-		skills: {},
-		weapons: {}
-	};
-	for (var i in e.ammunitions) metadata.ammunitions[e.ammunitions[i].id] = e.ammunitions[i];
-	for (var i in e.equips) metadata.equips[e.equips[i].id] = e.equips[i];
-	for (var i in e.skills) metadata.skills[e.skills[i].id] = e.skills[i];
-	for (var i in e.weapons) metadata.weapons[e.weapons[i].id] = e.weapons[i];
+	metadata = e;
 	
-	console.log(metadata);
+	metadata_ammunitions = {};
+	for (var i in e.ammunitions) metadata_ammunitions[e.ammunitions[i].id] = e.ammunitions[i];
 	
+	metadata_equips = {};
+	for (var i in e.equips) metadata_equips[e.equips[i].id] = e.equips[i];
+	
+	metadata_skills = {};
+	for (var i in e.skills) metadata_skills[e.skills[i].id] = e.skills[i];
 });
 
 
