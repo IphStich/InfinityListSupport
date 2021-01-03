@@ -88,6 +88,32 @@
 						if (equips[k].extra != null) ret += "("+equips[k].extra.name+")";
 					}
 				}
+				
+				ret += "<br>";
+				
+				var weap_profiles = curr.get_weapon_profiles();
+				console.log(weap_profiles);
+				if (weap_profiles.length > 0)
+				{
+					ret += "<table>"
+					ret += "<thead><tr><th>Name</th><th>Dam</th><th>B</th><th>Ammo</th><th>Save</th><th>Short</th><th>Medium</th><th>Long</th><th>Max</th></tr></thead>";
+					ret += "<tbody>";
+					for (var k in weap_profiles)
+					{
+						var w = weap_profiles[k];
+						ret += "<tr><td>"+w.name+"</td><td>"+w.damage+"</td><td>"+w.burst+"</td><td>"+((w.ammunition==0)?"--":metadata_ammunitions[w.ammunition].name)+"</td><td>"+w.saving+"</td>";
+						if (w.distance != null)
+						{
+							var d = w.distance;
+							if (typeof d.short != 'undefined' && d.short != null) ret += "<td>"+d.short.mod+" to "+(d.short.max*4/10)+"</td>";
+							if (typeof d.med != 'undefined' && d.med != null) ret += "<td>"+d.med.mod+" to "+(d.med.max*4/10)+"</td>";
+							if (typeof d.long != 'undefined' && d.long != null) ret += "<td>"+d.long.mod+" to "+(d.long.max*4/10)+"</td>";
+							if (typeof d.max != 'undefined' && d.max != null) ret += "<td>"+d.max.mod+" to "+(d.max.max*4/10)+"</td>";
+						}
+					}
+					ret += "</tbody>";
+					ret += "</table>";
+				}
 			}
 			
 			$("#main-body").html(ret);

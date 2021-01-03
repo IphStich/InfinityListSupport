@@ -358,5 +358,22 @@ function resolve_trooper_details (army, trooper)
 			}
 			return false;
 		},
+		
+		get_weapon_profiles: function (include_private = false)
+		{
+			var ret = [];
+			for (var i in metadata.weapons)
+			{
+				var w = metadata.weapons[i];
+				for (var j in this.abilities)
+				{
+					var a = this.abilities[j];
+					if (a.is_private && include_private == false) continue;
+					if (w.type != a.type || w.id != a.id) continue;
+					ret.push(w);
+				}
+			}
+			return ret;
+		},
 	};
 }
