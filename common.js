@@ -103,7 +103,29 @@ function load_army_code (code, on_success)
 	}
 	if (typeof army_details_library[ret.faction_id] == 'undefined')
 	{
-		$.getJSON("https://api.corvusbelli.com/army/units/en/" + ret.faction_id, function(e) { army_details_library[ret.faction_id] = e; on_success(army_details_library[ret.faction_id], ret); });
+		$.getJSON("https://api.corvusbelli.com/army/units/en/" + ret.faction_id, function(e) {
+			var extras = {};
+			for (var i in e.filters.extras) extras[e.filters.extras[i].id] = e.filters.extras[i];
+			var chars = {};
+			for (var i in e.filters.chars) chars[e.filters.chars[i].id] = e.filters.chars[i];
+			var peripheral = {};
+			for (var i in e.filters.peripheral) peripheral[e.filters.peripheral[i].id] = e.filters.peripheral[i];
+			var type = {};
+			for (var i in e.filters.type) type[e.filters.type[i].id] = e.filters.type[i];
+			var weapons = {};
+			for (var i in e.filters.weapons) weapons[e.filters.weapons[i].id] = e.filters.weapons[i];
+			
+			e.library = {
+				extras: extras,
+				chars: chars,
+				peripheral: peripheral,
+				type: type,
+				weapons: weapons,
+			};
+			
+			army_details_library[ret.faction_id] = e;
+			on_success(army_details_library[ret.faction_id], ret);
+		});
 	}
 	else
 	{
@@ -123,65 +145,205 @@ function fetch_list_details (code, on_success)
 			
 			for (var y in list.groups[x].troopers)
 			{
-				var current_trooper = list.groups[x].troopers[y];
-				var unit_profile = null;
-				var profile_group = null;
-				var option_profile = null;
-				
-				for (var i in army.units)
-				{
-					if (army.units[i].id == current_trooper.unit_id)
-					{
-						unit_profile = army.units[i];
-						for (var j in unit_profile.profileGroups)
-						{
-							if (unit_profile.profileGroups[j].id == current_trooper.profile_group_id)
-							{
-								profile_group = unit_profile.profileGroups[j];
-								for (var k in profile_group.options)
-								{
-									if (profile_group.options[k].id == current_trooper.option_id)
-									{
-										option_profile = profile_group.options[k];
-										break;
-									}
-								}
-								break;
-							}
-						}
-						break;
-					}
-				}
-				
-				if (unit_profile == null)
-				{
-					alert("THERE WAS A PROBLEM TRYING TO RESOLVE THE UNIT PROFILE FOR A TROOPER");
-					console.log([current_trooper, army]);
-					return;
-				}
-				if (profile_group == null)
-				{
-					alert("THERE WAS A PROBLEM TRYING TO RESOLVE THE PROFILE GROUP FOR A TROOPER");
-					console.log([current_trooper, army, unit_profile]);
-					return;
-				}
-				if (option_profile == null)
-				{
-					alert("THERE WAS A PROBLEM TRYING TO RESOLVE THE OPTION PROFILE FOR A TROOPER");
-					console.log([current_trooper, army, unit_profile, option_profile]);
-					return;
-				}
-				
-				
-				
-				ret_group.push({
-					name: option_profile.name,
-					raw: {unit_profile:unit_profile, profile_group:profile_group, option_profile:option_profile}
-				});
+				ret_group.push( resolve_trooper_details(army, list.groups[x].troopers[y]) );
 			}
+			
 			ret.push(ret_group);
 		}
 		
 		on_success (army, list, ret);
 	});
+}
+
+function resolve_trooper_details (army, trooper)
+{
+	var unit_profile = null;
+	var profile_group = null;
+	var option_profile = null;
+	
+	for (var i in army.units)
+	{
+		if (army.units[i].id == trooper.unit_id)
+		{
+			unit_profile = army.units[i];
+			for (var j in unit_profile.profileGroups)
+			{
+				if (unit_profile.profileGroups[j].id == trooper.profile_group_id)
+				{
+					profile_group = unit_profile.profileGroups[j];
+					for (var k in profile_group.options)
+					{
+						if (profile_group.options[k].id == trooper.option_id)
+						{
+							option_profile = profile_group.options[k];
+							break;
+						}
+					}
+					break;
+				}
+			}
+			break;
+		}
+	}
+	
+	// -- Check for if the ids were correctly resolved into profiles
+	
+	if (unit_profile == null)
+	{
+		alert("THERE WAS A PROBLEM TRYING TO RESOLVE THE UNIT PROFILE FOR A TROOPER");
+		console.log([trooper, army]);
+		return;
+	}
+	if (profile_group == null)
+	{
+		alert("THERE WAS A PROBLEM TRYING TO RESOLVE THE PROFILE GROUP FOR A TROOPER");
+		console.log([trooper, army, unit_profile]);
+		return;
+	}
+	if (option_profile == null)
+	{
+		alert("THERE WAS A PROBLEM TRYING TO RESOLVE THE OPTION PROFILE FOR A TROOPER");
+		console.log([trooper, army, unit_profile, option_profile]);
+		return;
+	}
+	
+	
+	// -- Check for compatability against what this app is currently capable of
+	
+	if (profile_group.profiles.length != 1)
+	{
+		alert("CANNOT CURRENTLY PROCESS UNITS WITH MULTIPLE PROFILES - different profiles may have different skills, equips, attributes, weapons");
+	}
+	if (profile_group.profiles[0].includes.length != 0 || option_profile.includes.length != 0)
+	{
+		alert("CANNOT CURRENTLY PROCESS UNITS WITH INCLUDED PROFILES");
+	}
+	
+	// TODO:
+	// Secondary profile attributes
+	// Secondary profile skills/equipment/weapons
+	// Included profiles
+	
+	var attributes = {};
+	
+	// -- Process the main profile
+	var p = profile_group.profiles[0];
+	
+	// Attributes
+	var attributes = {
+		name: p.name,
+		move: p.move,
+		cc: p.cc,
+		bs: p.bs,
+		ph: p.ph,
+		wip: p.wip,
+		arm: p.arm,
+		bts: p.bts,
+		w: p.w,
+		str: p.str, // true or false to indicate what 'w' is
+		s: p.s,
+		type: army.library.type[p.type].name,
+	};
+	
+	var abilities = [];
+	
+	var weapons = [];
+	weapons = weapons.concat(profile_group.profiles[0].weapons);
+	weapons = weapons.concat(option_profile.weapons);
+	
+	for (var i in weapons)
+	{
+		var w = weapons[i];
+		if (w.hasOwnProperty("extra") && w.extra != null && w.extra.length > 1)
+			alert("UNEXPECTED SKILL WITH MORE THAN 1 EXTRA");
+		
+		abilities.push({
+			id: w.id,
+			name: army.library.weapons[w.id].name,
+			type: "WEAPON",
+			extra: ( (w.hasOwnProperty("extra") && w.extra != null && w.extra.length == 1) ? army.library.extras[w.extra[0]] : null ),
+		});
+	}
+	
+	var skills = [];
+	skills = skills.concat(profile_group.profiles[0].skills);
+	skills = skills.concat(option_profile.skills);
+	
+	for (var i in skills)
+	{
+		var s = skills[i];
+		if (s.hasOwnProperty("extra") && s.extra != null && s.extra.length > 1)
+			alert("UNEXPECTED SKILL WITH MORE THAN 1 EXTRA");
+		
+		abilities.push({
+			id: s.id,
+			name: metadata_skills[s.id].name,
+			type: "SKILL",
+			extra: ( (s.hasOwnProperty("extra") && s.extra != null && s.extra.length == 1) ? army.library.extras[s.extra[0]] : null )
+		});
+	}
+	
+	var equips = [];
+	equips = equips.concat(profile_group.profiles[0].equip);
+	equips = equips.concat(option_profile.equip);
+	
+	for (var i in equips)
+	{
+		var e = equips[i];
+		if (e.hasOwnProperty("extra") && e.extra != null && e.extra.length > 1)
+			alert("UNEXPECTED SKILL WITH MORE THAN 1 EXTRA");
+		
+		abilities.push({
+			id: e.id,
+			name: metadata_equips[e.id].name,
+			type: "EQUIPMENT",
+			extra: ( (e.hasOwnProperty("extra") && e.extra != null && e.extra.length == 1) ? army.library.extras[e.extra[0]] : null )
+		});
+	}
+	
+	return {
+		name: option_profile.name,
+		attributes: attributes,
+		abilities: abilities,
+		raw: {unit_profile:unit_profile, profile_group:profile_group, option_profile:option_profile},
+		
+		get_all_skills: function()
+		{
+			var ret = [];
+			for (var i in this.abilities)
+			{
+				if (this.abilities[i].type == "SKILL")
+				{
+					ret.push(this.abilities[i]);
+				}
+			}
+			return ret;
+		},
+		
+		get_all_equipment: function()
+		{
+			var ret = [];
+			for (var i in this.abilities)
+			{
+				if (this.abilities[i].type == "EQUIPMENT")
+				{
+					ret.push(this.abilities[i]);
+				}
+			}
+			return ret;
+		},
+		
+		get_all_weapons: function()
+		{
+			var ret = [];
+			for (var i in this.abilities)
+			{
+				if (this.abilities[i].type == "WEAPON")
+				{
+					ret.push(this.abilities[i]);
+				}
+			}
+			return ret;
+		},
+	};
 }

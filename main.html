@@ -12,6 +12,7 @@
 	var test_code = "gZQPcmFtYWgtdGFza2ZvcmNlCSBSYW1haCBONIEsAgEIAYEvAQYAAoEvAQUAA4EvAQkABINRAQEABYEtAQgABoEtAQ4AB4EtAQQACIEuAQEAAgUBgTEBBgACgTEBAwADgTEBBQAEhSIBBQAFMgEBAA==";
 	//test_code = "gM0Md2hpdGUtYmFubmVyASCBLAEBAgCF1wEBAACF1wEBAA==";
 	//test_code = "gMkHeXUtamluZwEggSwBAQEAfAEBAA==";
+	//test_code = "glsKc2hhc3Zhc3RpaQEggSwBAQEAggwBAQA=";
 	
 	
 	fetch_list_details (test_code, function (army, list, details) {
@@ -26,6 +27,61 @@
 				var curr = details[i][j];
 				
 				ret += "<h3>"+curr.name+"</h3>";
+				
+				ret += "<b>Attributes:</b>";
+				ret += " MOV " + (curr.attributes.move[0]*4/10) + "-" + (curr.attributes.move[1]*4/10);
+				ret += " CC " + curr.attributes.cc;
+				ret += " BS " + curr.attributes.bs;
+				ret += " PH " + curr.attributes.ph;
+				ret += " WIP " + curr.attributes.wip;
+				ret += " ARM " + curr.attributes.arm;
+				ret += " BTS " + curr.attributes.bts;
+				ret += (curr.attributes.str ? " STR " : " W ") + curr.attributes.w;
+				
+				ret += "<br>";
+				
+				var weapons = curr.get_all_weapons();
+				if (weapons.length > 0)
+				{
+					ret += "<b>Weapons:</b> ";
+					var count = 0;
+					for (var k in weapons)
+					{
+						if (k > 0) ret += ", ";
+						ret += weapons[k].name;
+						if (weapons[k].extra != null) ret += "("+weapons[k].extra.name+")";
+					}
+				}
+				
+				ret += "<br>";
+				
+				var skills = curr.get_all_skills();
+				if (skills.length > 0)
+				{
+					ret += "<b>Skills:</b> ";
+					var count = 0;
+					for (var k in skills)
+					{
+						if (k > 0) ret += ", ";
+						ret += skills[k].name;
+						if (skills[k].extra != null) ret += "("+skills[k].extra.name+")";
+					}
+				}
+				
+				ret += "<br>";
+				
+				var equips = curr.get_all_equipment();
+				if (equips.length > 0)
+				{
+					ret += "<b>Equipment:</b> ";
+					var count = 0;
+					for (var k in equips)
+					{
+						if (k > 0) ret += ", ";
+						ret += equips[k].name;
+						if (equips[k].extra != null) ret += "("+equips[k].extra.name+")";
+					}
+				}
 			}
 			
 			$("#main-body").html(ret);
