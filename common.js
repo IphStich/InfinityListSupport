@@ -262,6 +262,7 @@ function resolve_trooper_details (army, trooper)
 			name: army.library.weapons[w.id].name,
 			type: "WEAPON",
 			extra: ( (w.hasOwnProperty("extra") && w.extra != null && w.extra.length == 1) ? army.library.extras[w.extra[0]] : null ),
+			is_private: false,
 		});
 	}
 	
@@ -279,7 +280,8 @@ function resolve_trooper_details (army, trooper)
 			id: s.id,
 			name: metadata_skills[s.id].name,
 			type: "SKILL",
-			extra: ( (s.hasOwnProperty("extra") && s.extra != null && s.extra.length == 1) ? army.library.extras[s.extra[0]] : null )
+			extra: ( (s.hasOwnProperty("extra") && s.extra != null && s.extra.length == 1) ? army.library.extras[s.extra[0]] : null ),
+			is_private: labels.private.skills.includes(s.id),
 		});
 	}
 	
@@ -297,7 +299,8 @@ function resolve_trooper_details (army, trooper)
 			id: e.id,
 			name: metadata_equips[e.id].name,
 			type: "EQUIPMENT",
-			extra: ( (e.hasOwnProperty("extra") && e.extra != null && e.extra.length == 1) ? army.library.extras[e.extra[0]] : null )
+			extra: ( (e.hasOwnProperty("extra") && e.extra != null && e.extra.length == 1) ? army.library.extras[e.extra[0]] : null ),
+			is_private: false,
 		});
 	}
 	
@@ -307,41 +310,38 @@ function resolve_trooper_details (army, trooper)
 		abilities: abilities,
 		raw: {unit_profile:unit_profile, profile_group:profile_group, option_profile:option_profile},
 		
-		get_all_skills: function()
+		get_all_skills: function (include_private = false)
 		{
 			var ret = [];
 			for (var i in this.abilities)
 			{
-				if (this.abilities[i].type == "SKILL")
-				{
-					ret.push(this.abilities[i]);
-				}
+				if (this.abilities[i].is_private && include_private == false) continue;
+				if (this.abilities[i].type != "SKILL") continue;
+				ret.push(this.abilities[i]);
 			}
 			return ret;
 		},
 		
-		get_all_equipment: function()
+		get_all_equipment: function (include_private = false)
 		{
 			var ret = [];
 			for (var i in this.abilities)
 			{
-				if (this.abilities[i].type == "EQUIPMENT")
-				{
-					ret.push(this.abilities[i]);
-				}
+				if (this.abilities[i].is_private && include_private == false) continue;
+				if (this.abilities[i].type != "EQUIPMENT") continue;
+				ret.push(this.abilities[i]);
 			}
 			return ret;
 		},
 		
-		get_all_weapons: function()
+		get_all_weapons: function (include_private = false)
 		{
 			var ret = [];
 			for (var i in this.abilities)
 			{
-				if (this.abilities[i].type == "WEAPON")
-				{
-					ret.push(this.abilities[i]);
-				}
+				if (this.abilities[i].is_private && include_private == false) continue;
+				if (this.abilities[i].type != "WEAPON") continue;
+				ret.push(this.abilities[i]);
 			}
 			return ret;
 		},
